@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up micromamba
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: environment.yml
+          cache-environment: true
+
+      - name: Run unit tests
+        run: pytest tests/test_channel.py tests/test_array_geometry.py tests/test_beamforming.py -v
+        shell: bash -el {0}
+
+      - name: Run smoke tests
+        run: pytest tests/test_smoke.py -v --timeout=120
+        shell: bash -el {0}

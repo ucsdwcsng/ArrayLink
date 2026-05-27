@@ -1,0 +1,20 @@
+name: arraylink
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - numpy>=1.24
+  - scipy>=1.10
+  - matplotlib>=3.7
+  - numexpr>=2.8
+  - h5py>=3.8
+  - pyyaml>=6.0
+  - pytest>=7.0
+  - pytest-timeout>=2.1
+  - pip
+  - pip:
+    - scienceplots>=2.0   # not on conda-forge
+
+# Optional: interactive 2D beam pattern (fig11 --interactive flag)
+# conda install -c conda-forge plotly

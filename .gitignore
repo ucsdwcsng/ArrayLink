@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Simulation outputs
+paper_figures/
+results/
+*.h5
+*.dat
+
+# Temporary files
+*.pkl
+# Exception: hardware dataset file is tracked intentionally
+!data/hardware_metrics.pkl
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Pytest
+.pytest_cache/
+.coverage

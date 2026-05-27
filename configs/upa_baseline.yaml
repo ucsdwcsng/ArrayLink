@@ -1,0 +1,48 @@
+# UPA baseline: 128x128 monolithic uniform planar array, 28 GHz
+# Matches the monolithic comparison in the paper (Sec. IV-C, Fig. 9a)
+
+frequency_hz: 28.0e+9
+
+ground_station:
+  mode: uniform
+  Nx: 1                         # single "panel" (the whole UPA)
+  Ny: 1
+  aperture_x_km: 0.0            # not used in uniform mode when Nx=Ny=1
+  aperture_y_km: 0.0
+  subarray_shape: [128, 128]    # full monolithic UPA
+  gamma: 3.0
+  jitter_frac: 0.0
+  seed: 0
+
+satellite:
+  mode: uniform
+  Nx: 2
+  Ny: 2
+  aperture_x_m: 1.414
+  aperture_y_m: 1.0
+
+target_satellite:
+  r_km: 500.0
+  theta_deg: 0.0
+  phi_deg: 0.0
+
+eval_grid:
+  r_km_min: 100.0
+  r_km_max: 3000.0
+  r_km_step: 50.0
+  theta_deg_min: -10.0
+  theta_deg_max: 10.0
+  theta_deg_step: 0.1
+  phi_deg_min: 0.0
+  phi_deg_max: 1.0
+  phi_deg_step: 1.0
+
+computation:
+  gain_variations: true
+  outer_batch_size: 20
+  dist_batch_size: 1000
+  min_limit_db: -50
+  element_gain_dbi: 6.0
+
+output:
+  paper_figures_dir: paper_figures
