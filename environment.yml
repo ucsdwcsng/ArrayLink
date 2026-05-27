@@ -11,6 +11,7 @@ dependencies:
   - h5py>=3.8
   - pyyaml>=6.0
   - pytest>=7.0
+  - pytest-timeout>=2.1
   - pip
   - pip:
     - scienceplots>=2.0   # not on conda-forge
