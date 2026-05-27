@@ -1,0 +1,56 @@
+# ArrayLink configuration: 16 x 32x32 panels, 1.414km x 1km aperture, 28 GHz
+# Matches the satellite-scale simulation in the paper (Sec. IV-C, Fig. 9b)
+
+# System parameters
+frequency_hz: 28.0e9            # 28 GHz (Ka-band)
+# wavelength_km derived automatically as c / frequency
+
+# Ground station (ArrayLink)
+ground_station:
+  mode: arraylink               # 'arraylink' (center-dense) or 'uniform'
+  Nx: 4                         # panels in x-direction
+  Ny: 4                         # panels in y-direction
+  aperture_x_km: 1.414          # sqrt(2) km
+  aperture_y_km: 1.0
+  subarray_shape: [32, 32]      # elements per panel
+  gamma: 3.0                    # power-law exponent for center-dense placement
+  jitter_frac: 0.0              # fractional random jitter (0 = deterministic)
+  seed: 0
+
+# Satellite (transmitter)
+satellite:
+  mode: uniform                 # uniform grid of tx antennas
+  Nx: 2                         # tx elements in x
+  Ny: 2                         # tx elements in y
+  aperture_x_m: 1.414           # 1.414 m (note: metres, not km)
+  aperture_y_m: 1.0
+
+# Target satellite location for beamforming weights
+target_satellite:
+  r_km: 500.0                   # distance
+  theta_deg: 0.0                # elevation (0 = zenith)
+  phi_deg: 0.0                  # azimuth
+
+# Beam pattern evaluation grid (spherical)
+eval_grid:
+  r_km_min: 100.0
+  r_km_max: 3000.0
+  r_km_step: 50.0
+  theta_deg_min: -10.0
+  theta_deg_max: 10.0
+  theta_deg_step: 0.1
+  phi_deg_min: 0.0
+  phi_deg_max: 1.0
+  phi_deg_step: 1.0
+
+# Beam pattern computation settings
+computation:
+  gain_variations: true         # include 1/d amplitude weighting
+  outer_batch_size: 20          # number of r slices per batch
+  dist_batch_size: 1000
+  min_limit_db: -50
+  element_gain_dbi: 6.0         # single-element gain added to beam pattern
+
+# Output
+output:
+  paper_figures_dir: paper_figures
