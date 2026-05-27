@@ -2,10 +2,11 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
+[**Webpage**](https://wcsng.ucsd.edu/arraylink/) | [**Paper**](https://wcsng.ucsd.edu/files/arraylink_paper.pdf) | [**Slides**](https://wcsng.ucsd.edu/files/arraylink_slides.pdf) | [**Poster**](https://wcsng.ucsd.edu/files/arraylink_poster.pdf) | [**Demo**](https://www.youtube.com/watch?v=HJBeDMcrmWs)
+
 Conventional satellite ground stations rely on a single large parabolic dish. ArrayLink replaces it with 16 distributed phased-array panels spanning a km-scale aperture — placing LEO/MEO satellites in the radiative near-field where the line-of-sight channel supports spatial multiplexing across independent streams, delivering throughput that no single dish can match.
 
-This repository contains the simulator and hardware experiment results for the INFOCOM 2026 paper.\
-For more details refer webpage: [wcsng.ucsd.edu/arraylink/](https://wcsng.ucsd.edu/arraylink/)
+This repository contains the simulator and hardware experiment results for the INFOCOM 2026 paper.
 
 ## Installation
 
