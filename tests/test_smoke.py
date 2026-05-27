@@ -33,6 +33,9 @@ def run_script(name, extra_args=None):
 
 
 class TestSmokeScripts:
+    def test_fig02_parabolic_gain(self):
+        run_script("fig02_parabolic_gain.py")
+
     def test_fig04_gain_vs_arrays(self):
         run_script("fig04_gain_vs_arrays.py")
 
