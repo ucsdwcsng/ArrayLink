@@ -13,6 +13,8 @@ results/
 
 # Temporary files
 *.pkl
+# Exception: hardware dataset file is tracked intentionally
+!data/hardware_metrics.pkl
 /tmp/
 
 # IDE

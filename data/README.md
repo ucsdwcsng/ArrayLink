@@ -1,45 +1,56 @@
 # Hardware Data
 
-The hardware experiment data for Fig. 10 will be released as part of the
-ArrayLink dataset.
+Hardware experiment data for Fig. 10 (singular-value ratio vs. distance).
 
-## Expected file
+## Included file
 
-Place `hardware_metrics.pkl` in this directory (i.e. `data/hardware_metrics.pkl`).
+`hardware_metrics.pkl` is included in this directory.  
+It contains pre-processed aggregate statistics extracted from the raw hardware
+measurements and is all that is needed to reproduce Fig. 10.
 
-## Format
-
-The pickle file should contain a Python `dict` with the following structure:
+## What the file contains
 
 ```python
-{
-    'case1': {
-        'distances':       [2.5, 5.0, 10.0, ...],   # metres
-        'mean_sing_ratio': [0.82, 0.75, 0.61, ...],  # mean sigma_2/sigma_1
-        'std_sing_ratio':  [0.03, 0.04, 0.05, ...],  # std dev across packets
-    },
-    'case2': { ... },
-    'case3': { ... },
-    'case4': { ... },
-}
+import pickle
+with open("data/hardware_metrics.pkl", "rb") as f:
+    data = pickle.load(f)
+
+# data is a dict keyed by case label (satellite-ground-station convention):
+# {
+#   'case1': {                         # Drx=50 cm, Dtx=50 cm
+#     'distances':       np.array([2.5, 5.0, 10.0, ...]),  # metres
+#     'mean_sing_ratio': np.array([...]),   # mean σ₂/σ₁ across packets
+#     'std_sing_ratio':  np.array([...]),   # std  σ₂/σ₁ across packets
+#     ... (additional keys not used by fig10)
+#   },
+#   'case2': { ... },   # Drx=20 cm, Dtx=50 cm
+#   'case3': { ... },   # Drx=20 cm, Dtx=20 cm
+#   'case4': { ... },   # Drx=50 cm, Dtx=20 cm
+# }
 ```
 
-where case1–case4 correspond to the four transmit/receive aperture configurations
-in Table I of the paper:
+`fig10_hardware_validation.py` remaps these keys to ArrayLink's case convention
+automatically on load — no manual step needed.
 
-| Case | d_tx (cm) | d_rx (cm) |
-|------|-----------|-----------|
-| 1    | 20        | 20        |
-| 2    | 50        | 20        |
-| 3    | 20        | 50        |
-| 4    | 50        | 50        |
+## Running Fig. 10
 
-## Running Fig 10 without hardware data
-
-`fig10_hardware_validation.py` will run with theory and simulation curves only
-if the pkl file is absent. It prints a clear message and continues:
-
+```bash
+python scripts/fig10_hardware_validation.py --save-dir paper_figures
 ```
-Hardware data not found at: data/hardware_metrics.pkl
-Proceeding with theory + simulation curves only.
-```
+
+## Raw channel data
+
+The full raw dataset (~31 GB of `.mat` channel matrix files) will be released
+on Zenodo. A download link and DOI will be added here before camera-ready.
+
+Each raw file contains:
+- Complex MIMO channel matrices `H[64 freq bins, 2×2, N packets]`
+- Measured at 27 GHz with a 2×2 MIMO testbed
+- Cases correspond to four (d_tx, d_rx) aperture configurations from Table I
+
+| Case | d_tx | d_rx |
+|------|------|------|
+| case1 | 50 cm | 50 cm |
+| case2 | 50 cm | 20 cm |
+| case3 | 20 cm | 20 cm |
+| case4 | 20 cm | 50 cm |

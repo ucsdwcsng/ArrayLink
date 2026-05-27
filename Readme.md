@@ -113,9 +113,10 @@ environment.yml     # Mamba/conda environment
 If you use this simulator, please cite:
 
 ```bibtex
-@inproceedings{arraylink2026,
-  title     = {ArrayLink: Distributed Ground Station for Near-Field LoS MIMO Satellite Communications},
-  booktitle = {IEEE INFOCOM},
-  year      = {2026},
+@article{vennam2025satellites,
+  title   = {Satellites are closer than you think: A near field MIMO approach for Ground stations},
+  author  = {Vennam, Rohith Reddy and Wilson, Luke and Jain, Ish Kumar and Bharadia, Dinesh},
+  journal = {arXiv preprint arXiv:2508.09374},
+  year    = {2025},
 }
 ```

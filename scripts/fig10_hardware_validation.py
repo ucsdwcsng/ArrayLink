@@ -54,6 +54,23 @@ CASES = {
     'case4': {'d_tx_cm': 50, 'd_rx_cm': 50},
 }
 
+# The hardware_metrics.pkl (from satellite-ground-station) uses a different
+# case numbering convention.  This map translates pkl keys → ArrayLink keys.
+#
+#   pkl key  Drx   Dtx     ArrayLink key
+#   case1    50cm  50cm  → case4
+#   case2    20cm  50cm  → case2  (same apertures, same label — coincidence)
+#   case3    20cm  20cm  → case1
+#   case4    50cm  20cm  → case3
+#   case0    40cm  40cm  → (not used in ArrayLink)
+#
+PKL_TO_ARRAYLINK = {
+    'case1': 'case4',
+    'case2': 'case2',
+    'case3': 'case1',
+    'case4': 'case3',
+}
+
 
 def parse_args():
     ap = argparse.ArgumentParser(description="Fig 10: hardware validation")
@@ -96,8 +113,12 @@ def main():
 
     if os.path.exists(data_path):
         with open(data_path, 'rb') as f:
-            hw_data = pickle.load(f)
-        print(f"Loaded hardware data from {data_path}")
+            raw = pickle.load(f)
+        # Remap pkl case keys to ArrayLink's case convention (apertures differ)
+        hw_data = {PKL_TO_ARRAYLINK[k]: v for k, v in raw.items()
+                   if k in PKL_TO_ARRAYLINK}
+        print(f"Loaded hardware data from {data_path} "
+              f"({len(hw_data)} cases remapped)")
     else:
         if args.quick:
             print(f"[quick mode] Hardware data not found at {data_path}. "
