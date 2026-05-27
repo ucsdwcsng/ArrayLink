@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Fig 6 — Singular-value ratio vs distance showing MIMO feasibility boundaries.
 
@@ -62,7 +65,7 @@ def main():
     if args.quick:
         for d_tx, d_rx, label in [
             (0.2, 0.2, "d_tx=d_rx=0.2m"),  # 20 cm x 20 cm
-            (np.sqrt(2e3), np.sqrt(2), "satellite scale"), # sqrt(2) km x sqrt(2) m
+            (np.sqrt(2) * 1e3, np.sqrt(2), "satellite scale"), # sqrt(2) km x sqrt(2) m  (metres, matching LAM_M)
         ]:
             r_min, r_max = mimo_region_bounds(d_tx, d_rx, LAM_M, tau=TAU)
             print(f"{label}: r_min={r_min:.2f}, r_max={r_max:.2f}")

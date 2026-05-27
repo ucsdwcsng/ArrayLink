@@ -1,9 +1,46 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
-Coordinate conversion and decibel helpers.
+Coordinate conversion, decibel helpers, and config loading.
 
 All coordinates in kilometres unless otherwise noted in the function signature.
 """
+import os
 import numpy as np
+
+
+def load_config(path):
+    """
+    Load a YAML configuration file.
+
+    The path may be absolute or relative to the repository root.
+    The repository root is inferred as the parent directory of the
+    ``arraylink/`` package (i.e. two levels up from this file).
+
+    Parameters
+    ----------
+    path : str
+        Path to the YAML config file, e.g. ``'configs/arraylink_1km.yaml'``.
+
+    Returns
+    -------
+    cfg : dict
+        Parsed YAML contents.
+
+    Examples
+    --------
+    >>> from arraylink.utils import load_config
+    >>> cfg = load_config('configs/arraylink_1km.yaml')
+    >>> cfg['frequency_hz']
+    28000000000.0  # stored as 28.0e+9 in YAML → parsed as float by PyYAML
+    """
+    import yaml
+    if not os.path.isabs(path):
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        path = os.path.join(repo_root, path)
+    with open(path) as f:
+        return yaml.safe_load(f)
 
 
 def spherical2cartesian(r, theta, phi, deg=False):

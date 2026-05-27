@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Beamforming weight generation and beam pattern computation.
 
@@ -33,7 +36,7 @@ except ImportError:
 
 def parabolic_gain_dbi(D, frequency, efficiency=0.6):
     """
-    Directional gain of a parabolic dish antenna (dBi).
+    On-axis (peak) gain of a circular parabolic dish antenna (dBi).
 
     G = eta * (pi*D/lambda)^2
 
@@ -52,6 +55,44 @@ def parabolic_gain_dbi(D, frequency, efficiency=0.6):
     c = 3e8
     lam = c / frequency
     gain_linear = efficiency * (np.pi * D / lam) ** 2
+    return 10.0 * np.log10(gain_linear)
+
+
+def parabolic_beam_pattern_dbi(D_m, frequency_hz, theta_deg, efficiency=0.6):
+    """
+    Full beam pattern of a circular parabolic dish vs scan angle (dBi).
+
+    Uses the Airy-disk (uniformly illuminated circular aperture) pattern:
+
+        G(θ) = G0 · [2 J1(x) / x]²,   x = π·D·sin(θ) / λ
+
+    where G0 = eta · (π·D/λ)² is the on-axis gain.
+
+    Paper reference: Fig. 2 — parabolic dish gain pattern.
+
+    Parameters
+    ----------
+    D_m         : dish diameter (metres)
+    frequency_hz: carrier frequency (Hz)
+    theta_deg   : scan angles (degrees), scalar or array
+    efficiency  : aperture efficiency eta (default 0.6)
+
+    Returns
+    -------
+    gain_dbi : ndarray, same shape as theta_deg, in dBi
+               (clipped at −100 dBi to avoid −∞ at nulls)
+    """
+    from scipy.special import j1
+    theta = np.deg2rad(np.asarray(theta_deg, dtype=float))
+    lam   = 3e8 / frequency_hz
+    k     = 2 * np.pi / lam
+    a     = D_m / 2.0
+    G0    = efficiency * (np.pi * D_m / lam) ** 2
+    x     = k * a * np.sin(theta)
+    # Stable evaluation: replace zeros with 1 before dividing, restore limit = 1
+    x_safe  = np.where(np.abs(x) < 1e-12, 1.0, x)
+    pattern = np.where(np.abs(x) < 1e-12, 1.0, (2.0 * j1(x_safe) / x_safe) ** 2)
+    gain_linear = np.maximum(G0 * pattern, 1e-10)   # floor avoids log(0)
     return 10.0 * np.log10(gain_linear)
 
 

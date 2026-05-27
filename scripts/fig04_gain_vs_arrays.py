@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Fig 4a/4b — Total and marginal gain vs number of phased-array panels.
 

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Fig 9 — Simulation setup and beam pattern results.
 
@@ -35,19 +38,14 @@ except ImportError:
 
 from arraylink.array_geometry import upa_positions, place_subarrays
 from arraylink.beamforming import dc_weights, compute_beam_pattern_numpy
+from arraylink.utils import load_config
 
 # --------------------------------------------------------------------------
-# Constants
+# Fig-09-specific constants (not in YAML — visualization layout choices)
 # --------------------------------------------------------------------------
-F_HZ      = 28e9
-LAM_KM    = 3e8 / F_HZ / 1e3   # ~1.0714e-5 km
-R_FOCAL   = 500.0               # km
-GRID_KM   = 2.0                 # panel centres within ±1 km × ±1 km
-MIN_GAP   = 0.1                 # minimum separation between panel centres [km]
-N_PANELS  = 16
-SUB_SHAPE = (32, 32)            # elements per panel
-N_UPA     = 128                 # UPA dimension (128×128)
-ELEM_GAIN = 6.0                 # element gain assumption [dBi]
+GRID_KM = 2.0    # panel centres drawn within ±1 km × ±1 km (display aperture)
+MIN_GAP = 0.1    # minimum separation between panel centres [km]
+N_UPA   = 128    # UPA dimension (128×128) used only in this figure
 
 
 # --------------------------------------------------------------------------
@@ -94,23 +92,23 @@ def _build_arraylink(panel_xy_km, sub_shape, elem_spacing_km):
 # --------------------------------------------------------------------------
 # Beam pattern helpers
 # --------------------------------------------------------------------------
-def _gain_vs_theta(ants_km, w, r_km, theta_deg):
+def _gain_vs_theta(ants_km, w, r_km, theta_deg, lam_km):
     thetas = np.deg2rad(theta_deg)
     sat_pts = np.column_stack([
         r_km * np.sin(thetas),
         np.zeros_like(thetas),
         r_km * np.cos(thetas),
     ])
-    return compute_beam_pattern_numpy(sat_pts, ants_km, w, LAM_KM)  # dB
+    return compute_beam_pattern_numpy(sat_pts, ants_km, w, lam_km)  # dB
 
 
-def _gain_vs_dist(ants_km, w, r_km_array):
+def _gain_vs_dist(ants_km, w, r_km_array, lam_km):
     sat_pts = np.column_stack([
         np.zeros(len(r_km_array)),
         np.zeros(len(r_km_array)),
         r_km_array,
     ])
-    return compute_beam_pattern_numpy(sat_pts, ants_km, w, LAM_KM)  # dB
+    return compute_beam_pattern_numpy(sat_pts, ants_km, w, lam_km)  # dB
 
 
 # --------------------------------------------------------------------------
@@ -118,6 +116,8 @@ def _gain_vs_dist(ants_km, w, r_km_array):
 # --------------------------------------------------------------------------
 def parse_args():
     ap = argparse.ArgumentParser(description="Fig 9: simulation setup and beam pattern")
+    ap.add_argument("--config", default="configs/arraylink_1km.yaml",
+                    help="Path to YAML config (default: configs/arraylink_1km.yaml)")
     ap.add_argument("--quick", action="store_true",
                     help="Coarse grids for fast smoke test")
     ap.add_argument("--center-dense", action="store_true",
@@ -129,6 +129,18 @@ def parse_args():
 def main():
     args = parse_args()
     os.makedirs(args.save_dir, exist_ok=True)
+
+    # ------------------------------------------------------------------ #
+    # Load config — students can change these in configs/arraylink_1km.yaml
+    # and see the effect on all figures that use this config.
+    # ------------------------------------------------------------------ #
+    cfg       = load_config(args.config)
+    F_HZ      = cfg['frequency_hz']
+    LAM_KM    = 3e8 / F_HZ / 1e3
+    R_FOCAL   = cfg['target_satellite']['r_km']
+    SUB_SHAPE = tuple(cfg['ground_station']['subarray_shape'])
+    N_PANELS  = cfg['ground_station']['Nx'] * cfg['ground_station']['Ny']
+    ELEM_GAIN = cfg['computation']['element_gain_dbi']
 
     if args.quick:
         theta_deg  = np.linspace(-90, 90, 19)
@@ -265,17 +277,17 @@ def main():
     # ------------------------------------------------------------------ #
     # Compute beam patterns
     # ------------------------------------------------------------------ #
-    bp_upa_theta  = _gain_vs_theta(upa_ants,  w_upa, R_FOCAL, theta_deg) + ELEM_GAIN
-    bp_s0_theta   = _gain_vs_theta(al_ants_s0, w_s0, R_FOCAL, theta_deg) + ELEM_GAIN
-    bp_s1_theta   = _gain_vs_theta(al_ants_s1, w_s1, R_FOCAL, theta_deg) + ELEM_GAIN
+    bp_upa_theta  = _gain_vs_theta(upa_ants,  w_upa, R_FOCAL, theta_deg, LAM_KM) + ELEM_GAIN
+    bp_s0_theta   = _gain_vs_theta(al_ants_s0, w_s0, R_FOCAL, theta_deg, LAM_KM) + ELEM_GAIN
+    bp_s1_theta   = _gain_vs_theta(al_ants_s1, w_s1, R_FOCAL, theta_deg, LAM_KM) + ELEM_GAIN
 
-    bp_upa_dist   = _gain_vs_dist(upa_ants,  w_upa, r_axis_km) + ELEM_GAIN
-    bp_s0_dist    = _gain_vs_dist(al_ants_s0, w_s0, r_axis_km) + ELEM_GAIN
-    bp_s1_dist    = _gain_vs_dist(al_ants_s1, w_s1, r_axis_km) + ELEM_GAIN
+    bp_upa_dist   = _gain_vs_dist(upa_ants,  w_upa, r_axis_km, LAM_KM) + ELEM_GAIN
+    bp_s0_dist    = _gain_vs_dist(al_ants_s0, w_s0, r_axis_km, LAM_KM) + ELEM_GAIN
+    bp_s1_dist    = _gain_vs_dist(al_ants_s1, w_s1, r_axis_km, LAM_KM) + ELEM_GAIN
 
     if args.center_dense:
-        bp_cd_theta = _gain_vs_theta(al_ants_cd, w_cd, R_FOCAL, theta_deg) + ELEM_GAIN
-        bp_cd_dist  = _gain_vs_dist(al_ants_cd, w_cd, r_axis_km) + ELEM_GAIN
+        bp_cd_theta = _gain_vs_theta(al_ants_cd, w_cd, R_FOCAL, theta_deg, LAM_KM) + ELEM_GAIN
+        bp_cd_dist  = _gain_vs_dist(al_ants_cd, w_cd, r_axis_km, LAM_KM) + ELEM_GAIN
 
     boresight_upa = bp_upa_dist[np.argmin(np.abs(r_axis_km - R_FOCAL))]
     boresight_s0  = bp_s0_dist[np.argmin(np.abs(r_axis_km - R_FOCAL))]

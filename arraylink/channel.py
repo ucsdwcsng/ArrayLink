@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Free-space LoS channel matrix and near-field MIMO analysis.
 
@@ -69,12 +72,18 @@ def singular_value_ratio(H):
 
 def degrees_of_freedom(H, threshold=0.1):
     """
-    Number of spatial streams whose normalised singular value exceeds `threshold`.
+    Number of spatial streams satisfying the paper's MIMO feasibility criterion.
 
-    threshold=0.1 matches the feasibility criterion in Eq. (7) of the paper.
+    Counts k where σ_k / σ_1 ≥ threshold  (paper Eq. 7, default threshold=0.1).
+
+    Note: uses the ratio σ_k/σ_1, NOT the L2-normalised absolute value.
+    The two are equivalent only for rank-1 channels; for multi-stream channels
+    the L2 norm suppresses all values and would under-count DoF.
     """
-    s = compute_singular_values(H, normalise=True)
-    return int(np.sum(s >= threshold))
+    s = compute_singular_values(H, normalise=False)
+    if s[0] == 0:
+        return 0
+    return int(np.sum(s / s[0] >= threshold))
 
 
 def spectral_efficiency(H, snr_linear):

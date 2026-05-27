@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Fig 12 — LoS MIMO degrees of freedom vs distance for ArrayLink.
 
@@ -28,11 +31,13 @@ except ImportError:
 
 from arraylink.channel import compute_channel_matrix, compute_singular_values
 from arraylink.array_geometry import build_ground_station, upa_positions
-from arraylink.utils import spherical2cartesian
+from arraylink.utils import spherical2cartesian, load_config
 
 
 def parse_args():
     ap = argparse.ArgumentParser(description="Fig 12: MIMO DoF vs distance")
+    ap.add_argument("--config", default="configs/arraylink_1km.yaml",
+                    help="Path to YAML config (default: configs/arraylink_1km.yaml)")
     ap.add_argument("--quick", action="store_true",
                     help="Run on a coarse distance grid (fast, for smoke test)")
     ap.add_argument("--save-dir", default="paper_figures")
@@ -43,22 +48,22 @@ def main():
     args = parse_args()
     os.makedirs(args.save_dir, exist_ok=True)
 
-    # --- System parameters ---
-    F_HZ = 28e9
-    C = 3e8
-    LAM_KM = C / F_HZ / 1e3     # wavelength in km (~1.07e-5 km)
-    TAU = 0.1                    # feasibility threshold
+    # --- Load config — students can change these in configs/arraylink_1km.yaml ---
+    cfg = load_config(args.config)
+    F_HZ   = cfg['frequency_hz']
+    LAM_KM = 3e8 / F_HZ / 1e3   # wavelength in km (~1.07e-5 km)
+    TAU    = 0.1                  # feasibility threshold
 
-    # Ground station: 16 x 32x32 panels over sqrt(2)km x 1km
-    GND_NX, GND_NY = 4, 4
-    GND_LX, GND_LY = np.sqrt(2), np.sqrt(2)   # km
-    PANEL_SHAPE = (32, 32)
+    # Ground station geometry from YAML
+    GND_NX      = cfg['ground_station']['Nx']
+    GND_NY      = cfg['ground_station']['Ny']
+    GND_LX      = cfg['ground_station']['aperture_x_km']   # sqrt(2) km
+    GND_LY      = cfg['ground_station']['aperture_y_km']   # 1.0 km
+    PANEL_SHAPE = tuple(cfg['ground_station']['subarray_shape'])
 
-    # Satellite: 2x2 element array, 1.414m x 1m aperture
-    # Assumption: 4-element array arranged as 2x2 UPA on a 1.414m x 1m grid
-    # in km:  1.414m = 1.414e-3 km,  1m = 1e-3 km
-    SAT_DX_KM = 1.414e-3     # 1.414 m in km
-    SAT_DY_KM = 1.0e-3       # 1.0 m in km
+    # Satellite: 2x2 element array (aperture from YAML, in metres → convert to km)
+    SAT_DX_KM = cfg['satellite']['aperture_x_m'] / 1e3
+    SAT_DY_KM = cfg['satellite']['aperture_y_m'] / 1e3
 
     if args.quick:
         dist_array_km = np.linspace(100, 3000, 5)
@@ -102,7 +107,9 @@ def main():
             ratio = float(s[k] / s[0]) if len(s) > k and s[0] > 0 else 0.0
             sing_ratios[k].append(ratio)
 
-        dof = int(np.sum(s >= TAU))
+        # Paper criterion: σ_k/σ_1 ≥ τ  (Eq. 7).  s[k]/s[0] = σ_k/σ_1
+        # (L2-normalisation factors cancel in the ratio).
+        dof = int(np.sum(s / s[0] >= TAU)) if s[0] > 0 else 0
         dof_list.append(dof)
 
     if args.quick:

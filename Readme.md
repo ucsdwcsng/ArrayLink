@@ -1,5 +1,7 @@
 # ArrayLink Simulator
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 Near-field LoS MIMO simulator for the ArrayLink distributed ground station (INFOCOM 2026).
 
 ArrayLink uses 16 phased-array panels spread across a km-scale aperture to form a
@@ -52,6 +54,7 @@ Run any figure script from the repo root:
 
 | Script | Figure | Description |
 |--------|--------|-------------|
+| `scripts/fig02_parabolic_gain.py` | Fig. 2 | Parabolic dish beam pattern vs scan angle (1.85 m and 1.47 m dishes) |
 | `scripts/fig04_gain_vs_arrays.py` | Fig. 4 | Array gain vs number of panels |
 | `scripts/fig06_mimo_boundaries.py` | Fig. 6 | Theoretical MIMO region boundaries |
 | `scripts/fig09_beampattern_sim.py` | Fig. 9 | Simulation setup: UPA/ArrayLink positions and gain vs θ / distance |
@@ -62,6 +65,7 @@ Run any figure script from the repo root:
 
 ```bash
 # Generate all figures (outputs to paper_figures/)
+# Runtime: ~2-3 min total (fig11 ~30 s, fig12 ~1 min, others seconds each)
 for s in scripts/fig*.py; do python $s; done
 
 # Interactive 2D beam pattern
@@ -107,6 +111,13 @@ environment.yml     # Mamba/conda environment
 | Panels | 16 (4×4 layout) | Center-dense over √2 km × 1 km |
 | Elements per panel | 32×32 = 1024 | Half-wavelength spacing |
 | Center-dense exponent γ | 3.0 | Power-law placement transform |
+
+## License
+
+This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.
+
+Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia  
+UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 
 ## Citation
 

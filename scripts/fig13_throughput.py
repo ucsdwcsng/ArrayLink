@@ -1,10 +1,13 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Fig 13 — Per-link and aggregate throughput comparison.
 
 Reproduces Fig. 13 from the ArrayLink paper (INFOCOM 2026).
 
 Compares:
-  - 1 stream @ 52.6 dBi (1.85 m dish baseline)
+  - 1 stream @ ~52.5 dBi (1.85 m dish baseline, η=0.6)
   - 2 streams @ 48.14 dBi (ArrayLink)
   - 4 streams @ 48.14 dBi (ArrayLink)
 
@@ -61,9 +64,9 @@ def main():
         SNR0_SWEEP = np.arange(5, 26, 2.5)
 
     configs = [
-        {"name": "1 stream @ 52.6 dBi (dish)",   "N": 1, "gain_dbi": G_DISH_185},
-        {"name": "2 streams @ 48.14 dBi (AL)",   "N": 2, "gain_dbi": G_ARRAYLINK},
-        {"name": "4 streams @ 48.14 dBi (AL)",   "N": 4, "gain_dbi": G_ARRAYLINK},
+        {"name": f"1 stream @ {G_DISH_185:.1f} dBi (dish)", "N": 1, "gain_dbi": G_DISH_185},
+        {"name": f"2 streams @ {G_ARRAYLINK:.2f} dBi (AL)", "N": 2, "gain_dbi": G_ARRAYLINK},
+        {"name": f"4 streams @ {G_ARRAYLINK:.2f} dBi (AL)", "N": 4, "gain_dbi": G_ARRAYLINK},
     ]
     markers = ['o', 's', '^']
     lines   = ['--', '-', '-.']
@@ -86,6 +89,7 @@ def main():
     if args.quick:
         for cfg in configs:
             print(f"{cfg['name']}: per-link={perlink_gbps[cfg['name']]}, agg={agg_gbps[cfg['name']]}")
+        print("Quick mode: computations done, skipping plot save.")
         return
 
     fig_params = dict(fontsize=20, tick_labelsize=18)

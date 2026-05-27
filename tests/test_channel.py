@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """Unit tests for arraylink.channel."""
 import numpy as np
 import pytest
@@ -126,3 +129,30 @@ class TestDegreesOfFreedom:
         dof = degrees_of_freedom(H)
         assert isinstance(dof, int)
         assert 1 <= dof <= 2
+
+    def test_uses_sigma1_ratio_not_l2_norm(self):
+        """
+        Confirm the criterion is σ_k/σ_1 ≥ threshold (paper Eq. 7), NOT
+        the L2-normalised absolute value.
+
+        Construct a synthetic H whose SVD is [1, 1, 0.12, 0.03]:
+          - paper criterion  (σ_k/σ_1 ≥ 0.1): DoF = 3  (σ_1, σ_2, σ_3 pass)
+          - L2-norm criterion (s_k ≥ 0.1)    : DoF = 2  (only σ_1, σ_2 pass
+            because s_2 = 0.12/‖s‖ ≈ 0.084 < 0.1 after L2 normalisation)
+        """
+        # Build a 4×4 diagonal matrix with the desired singular values
+        s_target = np.array([1.0, 1.0, 0.12, 0.03])
+        H_synthetic = np.diag(s_target.astype(complex))
+        dof = degrees_of_freedom(H_synthetic, threshold=0.1)
+        assert dof == 3, (
+            f"Expected DoF=3 (paper σ_k/σ_1 criterion), got {dof}. "
+            "Likely using L2-norm threshold which under-counts streams."
+        )
+
+    def test_rank1_channel_dof_is_1(self):
+        """A rank-1 channel should always have DoF=1."""
+        tx = np.array([[0.0, 0.0, 0.0]])
+        rx = np.array([[0.0, 0.0, 10.0], [0.1, 0.0, 10.0],
+                       [0.0, 0.1, 10.0], [0.1, 0.1, 10.0]])
+        H = compute_channel_matrix(tx, rx, 0.01)   # 4×1 → rank 1
+        assert degrees_of_freedom(H) == 1

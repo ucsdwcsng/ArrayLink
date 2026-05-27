@@ -59,8 +59,7 @@ At a high level, the script:
 
 ## Raw channel data
 
-> 📌 **Dataset link coming soon** — the full raw dataset will be released on Zenodo
-> before camera-ready. This section will be updated with the DOI and download instructions.
+> 📌 **Dataset link coming soon** — the full raw dataset will be released soon. This section will be updated with the DOI and download instructions.
 
 Each raw `.mat` file contains:
 - Complex MIMO channel matrices `H[64 freq bins, 2×2, N packets]`

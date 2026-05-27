@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """
 Fig 11 — 2D beam patterns (transverse × range heat maps).
 
@@ -64,6 +67,7 @@ from arraylink.array_geometry import build_ground_station, upa_positions, place_
 from arraylink.beamforming import (
     dc_weights, compute_beam_pattern_numpy,
 )
+from arraylink.utils import load_config
 
 
 def parse_args():
@@ -86,21 +90,14 @@ def parse_args():
                     help="RNG seed for random placement (default: 0)")
     ap.add_argument("--interactive", action="store_true",
                     help="Open Plotly interactive figure (requires plotly)")
+    ap.add_argument("--config", default="configs/arraylink_1km.yaml",
+                    help="Path to YAML config (default: configs/arraylink_1km.yaml)")
     ap.add_argument("--save-dir", default="paper_figures")
     return ap.parse_args()
 
 
-ELEMENT_GAIN_DBI = 6.0
-TARGET_R_KM      = 500.0    # DC focus range (km) — matches paper Fig. 11
-
-# ArrayLink aperture dimensions (km)
-AL_LX = np.sqrt(2)          # 1.414 km along X
-AL_LY = 1.0                 # 1.000 km along Y
-AL_NX = 4                   # panels along X
-AL_NY = 4                   # panels along Y
-
-
-def build_arraylink(placement, subarray_shape, element_spacing, seed):
+def build_arraylink(placement, subarray_shape, element_spacing, seed,
+                    nx, ny, lx, ly):
     """
     Build the ArrayLink antenna array according to the chosen placement strategy.
 
@@ -110,25 +107,27 @@ def build_arraylink(placement, subarray_shape, element_spacing, seed):
     subarray_shape : (M, N) elements per panel
     element_spacing: element pitch within a panel (km)
     seed           : RNG seed (used for 'random' placement)
+    nx, ny         : panels along X and Y (e.g. 4, 4)
+    lx, ly         : aperture extents in km (e.g. sqrt(2), 1.0)
 
     Returns
     -------
-    ants  : (Nx*Ny*M*N, 3) all antenna positions
-    bases : (Nx*Ny, 3)     panel base positions
+    ants  : (nx*ny*M*N, 3) all antenna positions
+    bases : (nx*ny, 3)     panel base positions
     """
-    n_panels = AL_NX * AL_NY
+    n_panels = nx * ny
 
     if placement == "random":
         rng = np.random.default_rng(seed)
-        bx = rng.uniform(-AL_LX / 2.0, AL_LX / 2.0, n_panels)
-        by = rng.uniform(-AL_LY / 2.0, AL_LY / 2.0, n_panels)
-        bases = np.stack([bx, by, np.zeros(n_panels)], axis=1)   # (16, 3)
+        bx = rng.uniform(-lx / 2.0, lx / 2.0, n_panels)
+        by = rng.uniform(-ly / 2.0, ly / 2.0, n_panels)
+        bases = np.stack([bx, by, np.zeros(n_panels)], axis=1)   # (n_panels, 3)
 
     elif placement == "center-dense":
         _, bases = build_ground_station(
             mode='arraylink', subarray_shape=subarray_shape,
             element_spacing=element_spacing,
-            Nx=AL_NX, Ny=AL_NY, Lx=AL_LX, Ly=AL_LY,
+            Nx=nx, Ny=ny, Lx=lx, Ly=ly,
             gamma=3.0, seed=seed,
         )
 
@@ -136,7 +135,7 @@ def build_arraylink(placement, subarray_shape, element_spacing, seed):
         _, bases = build_ground_station(
             mode='uniform', subarray_shape=subarray_shape,
             element_spacing=element_spacing,
-            Nx=AL_NX, Ny=AL_NY, Lx=AL_LX, Ly=AL_LY,
+            Nx=nx, Ny=ny, Lx=lx, Ly=ly,
         )
 
     else:
@@ -147,7 +146,7 @@ def build_arraylink(placement, subarray_shape, element_spacing, seed):
 
 
 def compute_2d_pattern(gnd_ants, weights, lam_km, x_axis, y_axis, quick,
-                       batch_size=2000):
+                       elem_gain_dbi, batch_size=2000):
     """
     Compute beam pattern on a Cartesian (X, Y) grid.
 
@@ -160,7 +159,7 @@ def compute_2d_pattern(gnd_ants, weights, lam_km, x_axis, y_axis, quick,
 
     if quick:
         bp = compute_beam_pattern_numpy(flat_pts, gnd_ants, weights, lam_km)
-        bp += ELEMENT_GAIN_DBI
+        bp += elem_gain_dbi
         return bp.reshape(Nx, Ny).T   # (Ny, Nx)
 
     # Batched numpy: process batch_size points at a time to keep RAM bounded
@@ -175,15 +174,23 @@ def compute_2d_pattern(gnd_ants, weights, lam_km, x_axis, y_axis, quick,
             pct = 100 * start / N
             print(f"    {pct:.0f}% ({start:,}/{N:,})", flush=True)
     gc.collect()
-    return (results + ELEMENT_GAIN_DBI).reshape(Nx, Ny).T   # (Ny, Nx)
+    return (results + elem_gain_dbi).reshape(Nx, Ny).T   # (Ny, Nx)
 
 
 def main():
     args = parse_args()
     os.makedirs(args.save_dir, exist_ok=True)
 
-    F_HZ   = 28e9
-    LAM_KM = 3e8 / F_HZ / 1e3
+    # Load config — students can change these in configs/arraylink_1km.yaml
+    cfg            = load_config(args.config)
+    F_HZ           = cfg['frequency_hz']
+    LAM_KM         = 3e8 / F_HZ / 1e3
+    TARGET_R_KM    = cfg['target_satellite']['r_km']
+    ELEMENT_GAIN_DBI = cfg['computation']['element_gain_dbi']
+    AL_NX          = cfg['ground_station']['Nx']
+    AL_NY          = cfg['ground_station']['Ny']
+    AL_LX          = cfg['ground_station']['aperture_x_km']
+    AL_LY          = cfg['ground_station']['aperture_y_km']
 
     if args.quick:
         # Minimal grid for smoke test — just verify code paths run
@@ -206,12 +213,14 @@ def main():
     # UPA 128×128 — compact monolithic array, λ/2 spacing
     upa_ants = upa_positions(128, 128, element_spacing=LAM_KM / 2.0)
 
-    # ArrayLink 4×4 panels × 32×32 elements — placement set by --placement flag
+    # ArrayLink panels × elements — placement set by --placement flag
     al_ants, al_bases = build_arraylink(
         placement=args.placement,
-        subarray_shape=(32, 32),
+        subarray_shape=tuple(cfg['ground_station']['subarray_shape']),
         element_spacing=LAM_KM / 2.0,
         seed=args.seed,
+        nx=AL_NX, ny=AL_NY,
+        lx=AL_LX, ly=AL_LY,
     )
 
     w_upa = dc_weights(sat_loc, upa_ants, LAM_KM)
@@ -224,10 +233,12 @@ def main():
           f"[resolution={res_tag}]")
 
     print("Computing UPA beam pattern …", flush=True)
-    bp_upa = compute_2d_pattern(upa_ants, w_upa, LAM_KM, x_axis, y_axis, args.quick)
+    bp_upa = compute_2d_pattern(upa_ants, w_upa, LAM_KM, x_axis, y_axis, args.quick,
+                                elem_gain_dbi=ELEMENT_GAIN_DBI)
 
     print("Computing ArrayLink beam pattern …", flush=True)
-    bp_al  = compute_2d_pattern(al_ants,  w_al,  LAM_KM, x_axis, y_axis, args.quick)
+    bp_al  = compute_2d_pattern(al_ants,  w_al,  LAM_KM, x_axis, y_axis, args.quick,
+                                elem_gain_dbi=ELEMENT_GAIN_DBI)
 
     if args.quick:
         print("Quick mode: patterns computed, skipping plot save.")
@@ -236,7 +247,7 @@ def main():
         return
 
     peak = max(bp_upa.max(), bp_al.max())
-    vmin = ELEMENT_GAIN_DBI   # floor = single-element gain (matches paper colorbar)
+    vmin = ELEMENT_GAIN_DBI    # floor = single-element gain (matches paper colorbar)
     vmax = peak
     print(f"Peak = {peak:.2f} dBi  |  colorbar [{vmin:.1f}, {vmax:.1f}] dBi")
 

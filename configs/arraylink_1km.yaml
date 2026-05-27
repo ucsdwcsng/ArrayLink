@@ -2,7 +2,7 @@
 # Matches the satellite-scale simulation in the paper (Sec. IV-C, Fig. 9b)
 
 # System parameters
-frequency_hz: 28.0e9            # 28 GHz (Ka-band)
+frequency_hz: 28.0e+9           # 28 GHz (Ka-band)
 # wavelength_km derived automatically as c / frequency
 
 # Ground station (ArrayLink)

@@ -1,7 +1,7 @@
 # UPA baseline: 128x128 monolithic uniform planar array, 28 GHz
 # Matches the monolithic comparison in the paper (Sec. IV-C, Fig. 9a)
 
-frequency_hz: 28.0e9
+frequency_hz: 28.0e+9
 
 ground_station:
   mode: uniform

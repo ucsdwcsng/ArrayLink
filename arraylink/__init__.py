@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Rohith Reddy Vennam, Luke Wilson, Ish Kumar Jain, Dinesh Bharadia
+# UC San Diego Wireless Communications Sensing and Networking Group (WCSNG)
 """ArrayLink near-field LoS MIMO simulator."""
 from .channel import (
     compute_channel_matrix,
@@ -17,6 +20,7 @@ from .array_geometry import (
 )
 from .beamforming import (
     parabolic_gain_dbi,
+    parabolic_beam_pattern_dbi,
     total_array_gain_dbi,
     marginal_gain_dbi,
     dc_weights,
@@ -25,6 +29,7 @@ from .beamforming import (
     compute_beam_pattern_numpy,
 )
 from .utils import (
+    load_config,
     spherical2cartesian,
     cartesian2spherical,
     linear2db,
