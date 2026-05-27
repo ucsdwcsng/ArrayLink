@@ -38,12 +38,31 @@ automatically on load — no manual step needed.
 python scripts/fig10_hardware_validation.py --save-dir paper_figures
 ```
 
+## How `hardware_metrics.pkl` was generated
+
+`hardware_metrics.pkl` was produced from the raw `.mat` channel files using:
+
+```
+python_simulator/targeted_scripts/hardware_experiments_analysis.py
+```
+
+At a high level, the script:
+1. Reads a logbook CSV that maps each `.mat` file to its distance, case, and aperture config
+2. Loads each `.mat` file (complex MIMO channel matrices, shape `[64 freq bins, 2×2, N packets]`)
+3. At a fixed frequency bin, computes σ₂/σ₁ (singular-value ratio) for every captured packet
+4. Aggregates per distance point → `mean_sing_ratio`, `std_sing_ratio`
+5. Saves the result as `hardware_metrics.pkl`
+
+> ⚠️ This script is part of the raw-data repository (link below) and requires
+> the full `.mat` dataset to run. It is **not** needed to reproduce Fig. 10 —
+> `hardware_metrics.pkl` is already included here.
+
 ## Raw channel data
 
-The full raw dataset (~31 GB of `.mat` channel matrix files) will be released
-on Zenodo. A download link and DOI will be added here before camera-ready.
+> 📌 **Dataset link coming soon** — the full raw dataset will be released on Zenodo
+> before camera-ready. This section will be updated with the DOI and download instructions.
 
-Each raw file contains:
+Each raw `.mat` file contains:
 - Complex MIMO channel matrices `H[64 freq bins, 2×2, N packets]`
 - Measured at 27 GHz with a 2×2 MIMO testbed
 - Cases correspond to four (d_tx, d_rx) aperture configurations from Table I
