@@ -2,9 +2,9 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-Near-field LoS MIMO simulator for the ArrayLink distributed ground station (INFOCOM 2026).
+Conventional satellite ground stations rely on a single large parabolic dish. ArrayLink replaces it with 16 distributed phased-array panels spanning a km-scale aperture — placing LEO/MEO satellites in the radiative near-field where the line-of-sight channel supports spatial multiplexing across independent streams, delivering throughput that no single dish can match.
 
-ArrayLink uses 16 phased-array panels spread across a km-scale aperture to exploit spatial multiplexing in the radiative near-field of LEO/MEO satellites.
+This repository is the full simulator for the INFOCOM 2026 paper.
 
 ## Installation
 
