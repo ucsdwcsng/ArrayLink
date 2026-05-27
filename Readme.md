@@ -4,7 +4,7 @@
 
 Conventional satellite ground stations rely on a single large parabolic dish. ArrayLink replaces it with 16 distributed phased-array panels spanning a km-scale aperture — placing LEO/MEO satellites in the radiative near-field where the line-of-sight channel supports spatial multiplexing across independent streams, delivering throughput that no single dish can match.
 
-This repository is the full simulator for the INFOCOM 2026 paper.
+This repository contains the simulator and hardware experiment results for the INFOCOM 2026 paper.
 
 ## Installation
 
