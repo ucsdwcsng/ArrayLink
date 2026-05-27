@@ -35,14 +35,15 @@ r_min, r_max = mimo_region_bounds(d_tx=2000, d_rx=1.0, wavelength=lam)
 print(f"MIMO region: {r_min/1e3:.0f} km – {r_max/1e3:.0f} km")
 
 # Build the ArrayLink ground station (16 panels, center-dense layout)
-gnd = build_ground_station(
+# Lx/Ly are in km; element_spacing is also in km
+gnd, _ = build_ground_station(
     mode="arraylink",
     subarray_shape=(32, 32),
-    element_spacing=lam / 2,
+    element_spacing=lam / 2 / 1e3,   # λ/2 converted to km
     Nx=4, Ny=4,
-    Lx=1414.2, Ly=1000.0,
+    Lx=1.4142, Ly=1.0,               # 1.414 km × 1.0 km aperture
 )
-print(f"Total antenna elements: {len(gnd)}")
+print(f"Total antenna elements: {len(gnd)}")   # → 16384
 ```
 
 ## Reproducing Paper Figures
