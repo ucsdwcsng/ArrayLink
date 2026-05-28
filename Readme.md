@@ -30,7 +30,7 @@ lam = 3e8 / 28e9
 r_min, r_max = mimo_region_bounds(d_tx=2000, d_rx=1.0, wavelength=lam)
 print(f"MIMO region: {r_min/1e3:.0f} – {r_max/1e3:.0f} km")
 
-# Build the ArrayLink ground station (16 panels, center-dense, √2 km × 1 km aperture)
+# Build the ArrayLink ground station (16 panels (each 32x32), √2 km × 1 km aperture)
 gnd, _ = build_ground_station(mode="arraylink", subarray_shape=(32, 32),
                                element_spacing=lam/2/1e3, Nx=4, Ny=4,
                                Lx=1.4142, Ly=1.0)
@@ -115,4 +115,4 @@ If you use this simulator, please cite:
   year    = {2025},
 }
 ```
-Webpage: [wcsng.ucsd.edu/arraylink/](https://wcsng.ucsd.edu/arraylink/)
+For more details refer webpage: [wcsng.ucsd.edu/arraylink/](https://wcsng.ucsd.edu/arraylink/)

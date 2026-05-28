@@ -302,9 +302,9 @@ def main():
     fig, ax = plt.subplots(figsize=(6, 4.5))
     ax.plot(theta_deg, bp_upa_theta, color='steelblue', linewidth=1.5, label="UPA")
     ax.plot(theta_deg, bp_s0_theta,  color='darkorange', linewidth=1.2,
-            linestyle='--', label="ArrayLink (rand., seed 0)")
+            linestyle='-.', label="ArrayLink (rand., seed 0)")
     ax.plot(theta_deg, bp_s1_theta,  color='seagreen', linewidth=1.2,
-            linestyle='-.', label="ArrayLink (rand., seed 1)")
+            linestyle='--', label="ArrayLink (rand., seed 1)")
     if args.center_dense:
         ax.plot(theta_deg, bp_cd_theta, color='purple', linewidth=1.2,
                 linestyle=':', label="ArrayLink (center-dense)")
@@ -326,9 +326,9 @@ def main():
     fig, ax = plt.subplots(figsize=(6, 4.5))
     ax.plot(r_axis_km, bp_upa_dist, color='steelblue', linewidth=1.5, label="UPA")
     ax.plot(r_axis_km, bp_s0_dist,  color='darkorange', linewidth=1.2,
-            linestyle='--', label="ArrayLink (rand., seed 0)")
+            linestyle='-.', label="ArrayLink (rand., seed 0)")
     ax.plot(r_axis_km, bp_s1_dist,  color='seagreen', linewidth=1.2,
-            linestyle='-.', label="ArrayLink (rand., seed 1)")
+            linestyle='--', label="ArrayLink (rand., seed 1)")
     if args.center_dense:
         ax.plot(r_axis_km, bp_cd_dist, color='purple', linewidth=1.2,
                 linestyle=':', label="ArrayLink (center-dense)")
