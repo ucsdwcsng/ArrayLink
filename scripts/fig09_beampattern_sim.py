@@ -146,7 +146,14 @@ def main():
         theta_deg  = np.linspace(-90, 90, 19)
         r_axis_km  = np.linspace(50, 2000, 11)
     else:
-        theta_deg  = np.linspace(-90, 90, 1801)
+        # Non-uniform θ grid: fine near the main lobe, coarser in the sidelobe region.
+        # This resolves the narrow main lobe precisely while avoiding the dense
+        # oscillation clutter that appears when sidelobes are over-sampled.
+        theta_deg = np.concatenate([
+            np.arange(-90, -10, 0.5),   # coarse — sidelobe region
+            np.arange(-10,  10, 0.01),  # fine   — main lobe  (~2000 pts over 20°)
+            np.arange( 10,  90.5, 0.5), # coarse — sidelobe region
+        ])
         r_axis_km  = np.linspace(10, 2000, 500)
 
     # ------------------------------------------------------------------ #
@@ -302,18 +309,22 @@ def main():
     fig, ax = plt.subplots(figsize=(6, 4.5))
     ax.plot(theta_deg, bp_upa_theta, color='steelblue', linewidth=1.5, label="UPA")
     ax.plot(theta_deg, bp_s0_theta,  color='darkorange', linewidth=1.2,
-            linestyle='--', label="ArrayLink")
+            linestyle='--', label="ArrayLink (rand., seed 0)")
     ax.plot(theta_deg, bp_s1_theta,  color='seagreen', linewidth=1.2,
-            linestyle='-.', label="ArrayLink")
+            linestyle='-.', label="ArrayLink (rand., seed 1)")
     if args.center_dense:
         ax.plot(theta_deg, bp_cd_theta, color='purple', linewidth=1.2,
                 linestyle=':', label="ArrayLink (center-dense)")
     ax.set_xlabel(r"$\theta$ (in deg)", fontsize=fig_kw['fontsize'])
     ax.set_ylabel("Gain (dB)", fontsize=fig_kw['fontsize'])
     ax.set_xlim(-90, 90)
+    ax.set_xticks([-90, -60, -30, 0, 30, 60, 90])
     ax.tick_params(labelsize=fig_kw['tick_labelsize'])
     ax.legend(fontsize=11, framealpha=0.5)
-    ax.grid(True, alpha=0.3)
+    # Major grid at every 30° + fine gridlines every 2° near the main lobe only
+    ax.grid(True, which='major', alpha=0.4)
+    for _t in np.arange(-10, 11, 2):
+        ax.axvline(_t, color='gray', linewidth=0.5, alpha=0.25, zorder=0)
     fig.tight_layout()
     out = os.path.join(args.save_dir, "fig09c_gain_vs_angle.pdf")
     fig.savefig(out, bbox_inches='tight')
